@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<style>
+    .toggle-icon {
+        transition: transform 0.2s ease-in-out;
+    }
+    button[aria-expanded="true"] .toggle-icon {
+        transform: rotate(90deg);
+    }
+    tr.collapse-row td {
+        background-color: #fdfdfd;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="card shadow-sm border-0 rounded-4 mt-4">
+    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+        <h3 class="fw-bold text-primary">All Invoices</h3>
+        <a href="{{ url_for('upload') }}" class="btn btn-sm btn-primary rounded-pill px-3"><i class="fa-solid fa-plus"></i> New</a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.9rem;">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 4%;"></th>
+                        <th>ID</th>
+                        <th>Vendor</th>
+                        <th>Inv #</th>
+                        <th>Date</th>
+                        <th>Tax #</th>
+                        <th>Curr</th>
+                        <th>Subtotal</th>
+                        <th>GST</th>
+                        <th>CGST/SGST/IGST</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in invoices %}
+                    <tr>
+                        <td>
+                            <button class="btn btn-sm btn-link p-0 text-decoration-none shadow-none text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#items-{{ inv.id }}" aria-expanded="false" aria-controls="items-{{ inv.id }}">
+                                <i class="fa-solid fa-chevron-right toggle-icon"></i>
+                            </button>
+                        </td>
+                        <td>#{{ inv.id }}</td>
+                        <td class="fw-bold text-truncate" style="max-width: 150px;" title="{{ inv.vendor_name }}">{{ inv.vendor_name }}</td>
+                        <td>{{ inv.invoice_number }}</td>
+                        <td>{{ inv.invoice_date }}</td>
+                        <td><span class="badge bg-secondary">{{ inv.tax_number }}</span></td>
+                        <td><span class="badge bg-info text-dark">{{ inv.currency }}</span></td>
+                        <td>{{ "%.2f"|format(inv.subtotal) }}</td>
+                        <td>{{ "%.2f"|format(inv.gst_amount) }}</td>
+                        <td class="text-muted" style="font-size: 0.8rem;">
+                            C:{{ "%.2f"|format(inv.cgst) }} <br>S:{{ "%.2f"|format(inv.sgst) }} <br>I:{{ "%.2f"|format(inv.igst) }}
+                        </td>
+                        <td class="text-success fw-bold">{{ "%.2f"|format(inv.grand_total) }}</td>
+                    </tr>
+                    <!-- Expandable Row -->
+                    <tr class="collapse-row">
+                        <td colspan="11" class="p-0 border-0">
+                            <div class="collapse px-4 py-3" id="items-{{ inv.id }}">
+                                <div class="p-3 bg-white rounded-3 border shadow-sm">
+                                    <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-list-check me-2"></i>Invoice Line Items</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped table-hover align-middle mb-0" style="font-size: 0.8rem;">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th class="text-center" style="width: 15%;">Quantity</th>
+                                                    <th class="text-end" style="width: 20%;">Unit Price</th>
+                                                    <th class="text-end" style="width: 20%;">Total Price</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in inv.line_items %}
+                                                <tr>
+                                                    <td class="fw-bold">{{ item.description }}</td>
+                                                    <td class="text-center">{{ item.quantity }}</td>
+                                                    <td class="text-end">{{ "%.2f"|format(item.unit_price) }}</td>
+                                                    <td class="text-end text-primary fw-bold">{{ "%.2f"|format(item.total_price) }}</td>
+                                                </tr>
+                                                {% else %}
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-3">No line items for this invoice.</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">No invoices found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

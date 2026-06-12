@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <h3 class="fw-bold text-primary mb-4 text-center">Search Invoices</h3>
+                <form action="{{ url_for('search') }}" method="GET" class="d-flex mb-5 shadow-sm rounded-pill p-1 border">
+                    <input type="text" name="q" class="form-control border-0 rounded-pill ms-2 shadow-none" placeholder="Search by Vendor, Invoice No, Date..." value="{{ query }}">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="fa-solid fa-search"></i> Search</button>
+                </form>
+
+                {% if query %}
+                    <h5 class="mb-4">Results for "<span class="text-primary">{{ query }}</span>"</h5>
+                    {% if results %}
+                        <div class="list-group list-group-flush">
+                            {% for inv in results %}
+                            <div class="list-group-item px-0 py-3 border-bottom">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">{{ inv.vendor_name }}</h6>
+                                        <p class="mb-1 text-muted small">Inv No: {{ inv.invoice_number }} &bull; Date: {{ inv.invoice_date }}</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <h5 class="text-success mb-0">${{ "%.2f"|format(inv.grand_total) }}</h5>
+                                        <small class="text-muted">Tax: ${{ "%.2f"|format(inv.gst_amount) }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted my-5">
+                            <i class="fa-solid fa-search-minus display-4 mb-3 opacity-25"></i>
+                            <p>No invoices found matching your query.</p>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

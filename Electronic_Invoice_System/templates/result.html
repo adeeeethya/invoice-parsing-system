@@ -1,0 +1,97 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <!-- Left Pane: Extracted Data -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-success text-white border-0 text-center py-3 rounded-top-4">
+                <i class="fa-solid fa-circle-check display-6 mb-2"></i>
+                <h4 class="fw-bold m-0">Extraction Successful</h4>
+                <p class="mb-0 small">Invoice ID: #{{ id }}</p>
+            </div>
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3 text-primary border-bottom pb-2">Parsed Fields</h5>
+                <table class="table table-sm table-borderless table-striped align-middle">
+                    <tbody>
+                        <tr><th class="w-50 text-muted">Original File</th><td class="fw-bold">{{ data.filename }}</td></tr>
+                        <tr><th class="text-muted">Vendor Name</th><td class="fw-bold">{{ data.vendor_name or 'N/A' }}</td></tr>
+                        <tr><th class="text-muted">Invoice Number</th><td>{{ data.invoice_number or 'N/A' }}</td></tr>
+                        <tr><th class="text-muted">Invoice Date</th><td>{{ data.invoice_date or 'N/A' }}</td></tr>
+                        <tr><th class="text-muted">Tax/GST Number</th><td><span class="badge bg-secondary">{{ data.tax_number or 'N/A' }}</span></td></tr>
+                        <tr><th class="text-muted">Currency</th><td><span class="badge bg-info text-dark">{{ data.currency }}</span></td></tr>
+                        <tr><th class="text-muted">Subtotal</th><td>{{ data.subtotal }}</td></tr>
+                        <tr><th class="text-muted">GST Amount</th><td>{{ data.gst_amount }}</td></tr>
+                        <tr><th class="text-muted">CGST</th><td>{{ data.cgst }}</td></tr>
+                        <tr><th class="text-muted">SGST</th><td>{{ data.sgst }}</td></tr>
+                        <tr><th class="text-muted">IGST</th><td>{{ data.igst }}</td></tr>
+                        <tr><th class="text-muted text-success h6">Grand Total</th><td class="text-success fw-bold h6">{{ data.grand_total }}</td></tr>
+                    </tbody>
+                </table>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3 pt-2 border-top">
+                    <a href="{{ url_for('upload') }}" class="btn btn-outline-primary btn-sm rounded-pill"><i class="fa-solid fa-cloud-upload-alt"></i> Upload Another</a>
+                    <a href="{{ url_for('invoices') }}" class="btn btn-primary btn-sm rounded-pill"><i class="fa-solid fa-list"></i> View All Invoices</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Pane: Extracted Line Items -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-dark text-white border-0 py-3 rounded-top-4">
+                <h5 class="fw-bold m-0"><i class="fa-solid fa-list-check"></i> Invoice Line Items</h5>
+                <small class="text-light">Extracted details list</small>
+            </div>
+            <div class="card-body p-3">
+                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-center" style="width: 15%;">Qty</th>
+                                <th class="text-end" style="width: 25%;">Unit Price</th>
+                                <th class="text-end" style="width: 25%;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.line_items %}
+                            <tr>
+                                <td class="fw-bold text-wrap">{{ item.description }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">{{ "%.2f"|format(item.unit_price) }}</td>
+                                <td class="text-end text-primary fw-bold">{{ "%.2f"|format(item.total_price) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No line items extracted.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row: Accordion for Debugging & Verification -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="accordion shadow-sm rounded-4" id="ocrAccordion">
+            <div class="accordion-item border-0 rounded-4 overflow-hidden">
+                <h2 class="accordion-header" id="headingOCR">
+                    <button class="accordion-button collapsed fw-bold bg-white text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOCR" aria-expanded="false" aria-controls="collapseOCR">
+                        <i class="fa-solid fa-file-code text-muted me-2"></i> Raw OCR Text (Click to View)
+                    </button>
+                </h2>
+                <div id="collapseOCR" class="accordion-collapse collapse" aria-labelledby="headingOCR" data-bs-parent="#ocrAccordion">
+                    <div class="accordion-body bg-light p-0 border-top">
+                        <pre class="m-0 p-3" style="max-height: 400px; overflow-y: auto; font-size: 0.85rem; font-family: monospace;">{{ data.raw_ocr_text }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
